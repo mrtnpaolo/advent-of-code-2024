@@ -1,0 +1,69 @@
+cabal-version:      3.0
+name:               advent-of-code2024
+version:            0.0.0.0
+synopsis:           https://adventofcode.com/2024
+description:        Advent of Code 2024 solutions
+homepage:           https://github.com/mrtnpaolo/advent-of-code-2024
+license:            MIT
+license-file:       LICENSE
+author:             Paolo Martini
+maintainer:         mrtnpaolo@protonmail.com
+copyright:          2024 Paolo Martini
+bug-reports:        https://github.com/mrtnpaolo/advent-of-code-2024/issues
+build-type:         Simple
+data-files:         inputs/*
+
+common warnings
+    ghc-options: -Wall
+                 -Wno-unused-imports
+                 -Wno-incomplete-patterns
+                 -Wno-incomplete-uni-patterns
+                 -Wno-missing-signatures
+                 -Wno-type-defaults
+                 -Wno-x-partial
+                 -Wno-name-shadowing
+
+common extensions
+    default-extensions: PartialTypeSignatures
+                        ImportQualifiedPost
+                        TypeApplications
+                        PatternSynonyms
+                        ViewPatterns
+                        BlockArguments
+                        LambdaCase
+                        RecordWildCards
+                        ParallelListComp
+
+library
+    import:             warnings
+    import:             extensions
+    exposed-modules:    Advent
+                      , Advent.Coord
+                      , Advent.Input
+                      , Advent.Search
+                      , Advent.Chinese
+                      , Advent.List
+                      , Advent.Memo
+    other-modules:      Advent.Deque
+                      , Advent.PQueue
+    build-depends:      base
+                      , array
+                      , containers
+                      , MemoTrie
+    hs-source-dirs:     common
+    default-language:   GHC2021
+
+common day
+    import:             warnings
+    import:             extensions
+    build-depends:      advent-of-code2024
+                      , base
+                      , array
+                      , split
+                      , containers
+    hs-source-dirs:     execs
+    default-language:   GHC2021
+
+executable Day01
+    import:             day
+    main-is:            Day01.hs
