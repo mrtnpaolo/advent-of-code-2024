@@ -1,37 +1,30 @@
 module Main (main) where
 
-import Advent
-import Data.Char
+import Advent    (getInput)
+import Data.Char (isDigit)
+import Data.List (splitAt)
 
 main =
   do inp <- getInput id 3
      print (part1 inp)
      print (part2 inp)
 
-part1 = sum . map (uncurry (*)) . parse1
+part1 = sum . map (uncurry (*)) . parse
 
-parse1 xs
-  | ('m':'u':'l':'(':xs1) <- xs
-  , (l@(_:_),',':xs2) <- (takeWhile isDigit xs1,dropWhile isDigit xs1)
-  , (r@(_:_),')':xs3) <- (takeWhile isDigit xs2,dropWhile isDigit xs2)
-  = (read @Int l,read @Int r) : parse1 xs3
+parse xs
+  | ("mul(",xs1) <- splitAt 4 xs
+  , l <- takeWhile isDigit xs1, ll <- length l, ll `elem` [1,2,3], xs2 <- drop ll xs1
+  , (',':xs3) <- xs2
+  , r <- takeWhile isDigit xs3, rl <- length r, rl `elem` [1,2,3], xs4 <- drop rl xs3
+  , (')':xs5) <- xs4
+  = (read @Int l,read @Int r) : parse xs5
+parse (_:xs) = parse xs
+parse []     = []
 
-parse1 (_:xs) = parse1 xs
+part2 = part1 . clean True
 
-parse1 _ = []
-
-part2 = sum . map (uncurry (*)) . parse2 True
-
-parse2 False xs | ('d':'o':'(':')':xs1) <- xs = parse2 True xs1
-
-parse2 True xs | ('d':'o':'n':'\'':'t':'(':')':xs1) <- xs = parse2 False xs1
-
-parse2 True xs
-  | ('m':'u':'l':'(':xs1) <- xs
-  , (l@(_:_),',':xs2) <- (takeWhile isDigit xs1,dropWhile isDigit xs1)
-  , (r@(_:_),')':xs3) <- (takeWhile isDigit xs2,dropWhile isDigit xs2)
-  = (read @Int l,read @Int r) : parse2 True xs3
-
-parse2 e (_:xs) = parse2 e xs
-
-parse2  _ _ = []
+clean True  xs | ("don't()",rest) <- splitAt 7 xs = clean False rest
+clean False xs | ("do()"   ,rest) <- splitAt 4 xs = clean True  rest
+clean True  (x:xs) = x : clean True  xs
+clean False (_:xs) =     clean False xs
+clean _     []     = []
