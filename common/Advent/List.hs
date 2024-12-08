@@ -2,9 +2,10 @@ module Advent.List
   ( count
   , freqs
   , findRepeatOn
+  , pairs
   ) where
 
-import Data.List (foldl')
+import Data.List (foldl',tails)
 import Data.Map.Strict qualified as M (toAscList,fromListWith,empty,(!?),insert)
 
 count :: (a -> Bool) -> [a] -> Int
@@ -23,3 +24,6 @@ findRepeatOn f = go M.empty 0
       case seen M.!? f x of
         Nothing -> go (M.insert (f x) n seen) (n+1) xs
         Just m  -> (m,n)
+
+pairs :: [a] -> [(a,a)]
+pairs xs = [ (x,y) | (x:ys) <- tails xs, y <- ys ]

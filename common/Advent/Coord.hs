@@ -78,7 +78,29 @@ addCoord :: Coord -> Coord -> Coord
 addCoord (C y x) (C v u) = C (y+v) (x+u)
 
 scaleCoord :: Int -> Coord -> Coord
-scaleCoord n (C y x) = C (n*y) (n*x)
+scaleCoord n = mapCoord (n*)
+
+mapCoord :: (Int -> Int) -> Coord -> Coord
+mapCoord f (C y x) = C (f y) (f x)
+
+zipCoord :: (Int -> Int -> Int) -> Coord -> Coord -> Coord
+zipCoord f (C y1 x1) (C y2 x2) = C (f y1 y2) (f x1 x2)
+
+instance Num Coord where
+  (+) = zipCoord (+)
+  {-# INLINE (+) #-}
+  (-) = zipCoord (-)
+  {-# INLINE (-) #-}
+  (*) = zipCoord (*)
+  {-# INLINE (*) #-}
+  negate = mapCoord negate
+  {-# INLINE negate #-}
+  abs = mapCoord abs
+  {-# INLINE abs #-}
+  signum = mapCoord signum
+  {-# INLINE signum #-}
+  fromInteger = (\i -> C i i) . fromInteger
+  {-# INLINE fromInteger #-}
 
 instance Ix Coord where
   unsafeIndex (C ym xm,C _yM xM) (C y x) =
