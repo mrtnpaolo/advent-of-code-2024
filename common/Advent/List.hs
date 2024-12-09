@@ -5,10 +5,11 @@ module Advent.List
   , pairs
   ) where
 
-import Data.List (foldl',tails)
+import Data.List (tails)
+import Data.Foldable (foldl')
 import Data.Map.Strict qualified as M (toAscList,fromListWith,empty,(!?),insert)
 
-count :: (a -> Bool) -> [a] -> Int
+count :: Foldable f => (a -> Bool) -> f a -> Int
 count p xs = foldl' f 0 xs
   where
     f n x | p x = n+1 | otherwise = n
