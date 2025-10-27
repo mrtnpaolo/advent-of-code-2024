@@ -1,26 +1,11 @@
 module Main (main) where
 
 import Advent
-import Numeric
-import Data.Ix
-import Data.Ord
-import Data.Char
-import Data.Maybe
-import Data.Either
-import Data.List          qualified as L
-import Data.List.Split    qualified as L
-import Data.Set           qualified as S
-import Data.Map.Strict    qualified as M
-import Data.IntSet        qualified as IS
-import Data.IntMap.Strict qualified as IM
-import Data.Array.Unboxed qualified as A
-import Debug.Trace
-import Control.Monad
+import Data.List          qualified as L (partition)
+import Data.List.Split    qualified as L (splitOn)
+import Data.Array.Unboxed qualified as A (UArray, listArray,assocs, (!), (//), bounds, elems)
 
 type Maze = A.UArray Coord Char
-
-p :: Maze -> IO ()
-p = putStrLn . drawCoords . M.fromList . A.assocs
 
 main =
   do inp <- getInput parse 15
@@ -29,11 +14,11 @@ main =
   where
     parse xss = (m,dirs)
       where
-        dirs    = concat (lines xs)
-        m       = A.listArray bounds (concat rows) :: Maze
         [ms,xs] = L.splitOn "\n\n" xss
         rows    = lines ms; height = length rows; width = length (head rows)
         bounds  = (origin, C (height-1) (width-1))
+        m       = A.listArray bounds (concat rows) :: Maze
+        dirs    = concat (lines xs)
 
 part1 = gps 'O' . run
 
@@ -74,19 +59,10 @@ move '<' = left
 
 part2 (m,ds) = gps '[' $ run2 (expand m) ds
 
-expand m = A.listArray bs cs :: Maze
+expand m = A.listArray bs xs :: Maze
   where
-    bs = (cm, C yM (2*xM+1))
-
-    (cm,cM@(C yM xM)) = A.bounds m
-
-    -- cs = concat [ f (m A.! c) | c <- range (cm,cM) ]
-    cs = range (cm,cM) >>= f . (m A.!)
-
-    f '.' = ".."
-    f '#' = "##"
-    f 'O' = "[]"
-    f '@' = "@."
+    bs = (cm,C yM (2*xM+1)) where (cm,C yM xM) = A.bounds m
+    xs = (\case '.'->"..";'#'->"##";'O'->"[]";'@'->"@.") `concatMap` (A.elems m)
 
 run2 m ds = go m start ds
   where
@@ -103,14 +79,13 @@ run2 m ds = go m start ds
 
         (ends,items) = dango m d c
 
-        blocked = '#' `elem` (at `map` ends)
+        blocked = any (('#' ==) . at) ends
 
         m' = m A.// updates
 
-        updates = M.toList $ M.fromList $
-          concat [ [ (ci,'.') | ci <- items ]
-                 , [ (next ci,at ci) | ci <- items ]
-                 , [ (c,'.'), (c','@') ] ]
+        updates = [ (ci,     '.'  ) | ci <- items ] ++
+                  [ (next ci,at ci) | ci <- items ] ++
+                  [ (c,'.'), (c','@') ]
 
         c' = next c
 
